@@ -34,7 +34,6 @@ func doReduce(
 			if err := jsonDecoder.Decode(tmp); err != nil {
 				logger.WithError(err).Error("[doReduce] fail to call Decode")
 			} else {
-				logger.WithField("keyValue", *tmp).Info("[doMap]")
 				for _, keyValue := range *tmp {
 					reducedData[keyValue.Key] = append(reducedData[keyValue.Key], keyValue.Value)
 				}
