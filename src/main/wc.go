@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"mapreduce"
 	"os"
+	"unicode"
+	logger "github.com/sirupsen/logrus"
+	"strconv"
+	"strings"
 )
 
 //
@@ -15,6 +19,24 @@ import (
 //
 func mapF(filename string, contents string) []mapreduce.KeyValue {
 	// Your code here (Part II).
+	mapKeyValue := make(map[string]int64, 0)
+	keyValue := make([]mapreduce.KeyValue, 0)
+
+	for _, word := range strings.FieldsFunc(contents, func(r rune) bool {
+		return !unicode.IsLetter(r)
+	}) {
+		if value, ok := mapKeyValue[word]; !ok {
+			mapKeyValue[word] = 1
+		} else {
+			mapKeyValue[word] = value + 1
+		}
+	}
+
+	for key, value := range mapKeyValue {
+		keyValue = append(keyValue, mapreduce.KeyValue{Key: key, Value: strconv.FormatInt(value, 10)})
+	}
+
+	return keyValue
 }
 
 //
@@ -24,6 +46,15 @@ func mapF(filename string, contents string) []mapreduce.KeyValue {
 //
 func reduceF(key string, values []string) string {
 	// Your code here (Part II).
+	sumElement := int64(0)
+	for _, value := range values {
+		if tmpInt, err := strconv.ParseInt(value, 10, 64); err != nil {
+			logger.WithField("value", value).WithError(err).Error("[reduceF] fail to call ParseInt")
+		} else {
+			sumElement += tmpInt
+		}
+	}
+	return strconv.FormatInt(sumElement, 10)
 }
 
 // Can be run in 3 ways:
